@@ -1,14 +1,23 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"image/png"
 	"math/rand"
 	"os"
 
-	"github.com/hajimehoshi/ebiten/v2"
+	ebiten "github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"golang.org/x/image/font/basicfont"
 )
+
+// TODO:
+// 1. scoring system
+// 2. intro screen
+// 3. game over screen
+// 4. object design
 
 const (
 	screenWidth    = 320
@@ -22,6 +31,7 @@ type Game struct {
 	obstacleX float64
 	obstacleY float64
 	avatar    *ebiten.Image
+	score     int
 }
 
 func (g *Game) Update() error {
@@ -39,9 +49,11 @@ func (g *Game) Update() error {
 		g.obstacleX = float64(rand.Intn(screenWidth - obstacleLength))
 	}
 
+	// hit
 	if g.obstacleY > playerHeight && g.playerX < g.obstacleX+obstacleLength && g.playerX > g.obstacleX-obstacleLength {
 		g.obstacleY = 0
 		g.obstacleX = float64(rand.Intn(screenWidth - obstacleLength))
+		g.score += 10
 	}
 
 	return nil
@@ -72,6 +84,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	// obstacle
 	vector.DrawFilledRect(screen, float32(g.obstacleX), float32(g.obstacleY), obstacleLength, obstacleLength, color.RGBA{255, 0, 0, 255}, false)
+
+	// score
+	scoreTxt := fmt.Sprintf("Score: %d", g.score)
+
+	text.Draw(screen, scoreTxt, basicfont.Face7x13, 10, 20, color.White)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
